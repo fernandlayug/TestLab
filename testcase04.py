@@ -135,9 +135,8 @@ print(df_pca1)
 # giving a larger plot
 plt.figure(figsize=(8, 6))
 
-plt.scatter(x_pca[:, 0], x_pca[:, 1],
-			c=df['Completed'],
-			cmap='plasma')
+# Scatter plot with color based on 'Completed' column
+plt.scatter(x_pca[:, 0], x_pca[:, 1], c=np.where(df['Completed'] == 'Completed', 'blue', 'red'))
 
 # labeling x and y axes
 plt.xlabel('First Principal Component')
@@ -195,12 +194,11 @@ if 'Completed' in y_test.unique():
     # Convert labels to binary format
     y_test_binary = (y_test == 'Completed').astype(int)
 
-    # Check Data Distribution
-
+    # Predict probabilities for the positive class
+    y_proba_positive = pipeline.predict_proba(X_test)[:, 1]
 
     # Compute ROC curve and AUC
-
-    fpr, tpr, thresholds = roc_curve(y_proba)
+    fpr, tpr, thresholds = roc_curve(y_test_binary, y_proba_positive)
     roc_auc = auc(fpr, tpr)
     
 
