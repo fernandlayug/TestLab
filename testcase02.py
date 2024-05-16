@@ -160,60 +160,22 @@ print("Principal Components:")
 print(components)
 
 
-from sklearn.model_selection import train_test_split
-from sklearn.ensemble import GradientBoostingClassifier
-from sklearn.metrics import accuracy_score, roc_curve, auc
-from sklearn.preprocessing import StandardScaler
-from sklearn.pipeline import Pipeline
 
-# Assuming df contains your dataset with features and target
-# Split the data into training and testing sets
-X_train, X_test, y_train, y_test = train_test_split(Z, df['Completed'], test_size=0.2, random_state=42)
+# Step 5: Apply PCA
+pca = PCA(n_components=n_components)
+pca.fit(X_pca)
 
-# Initialize a pipeline with PCA and Gradient Boosting Decision Trees
-pipeline = Pipeline([
-    ('scaler', StandardScaler()),  # Standardize the data
-    ('pca', PCA(n_components=2)),  # Perform PCA
-    ('gbdt', GradientBoostingClassifier())  # Gradient Boosting Decision Trees classifier
-])
+# Step 6: Analyze loadings of each principal component
+loadings = pca.components_
 
-# Fit the pipeline on the training data
-pipeline.fit(X_train, y_train)
+# Get the absolute values of loadings for each feature
+abs_loadings = np.abs(loadings)
 
-# Predict probabilities on the testing set
-y_proba = pipeline.predict_proba(X_test)[:, 1]
+# Determine the most important feature for each principal component
+most_important_features = abs_loadings.argmax(axis=1)
 
-# Predict on the testing set
-y_pred = pipeline.predict(X_test)
+# Get the names of the selected features
+selected_features = df.columns[most_important_features]
 
-# Calculate accuracy
-accuracy = accuracy_score(y_test, y_pred)
-print("Accuracy:", accuracy)
-
-# Check if there are positive samples in the test set
-if 'Completed' in y_test.unique():
-    # Convert labels to binary format
-    y_test_binary = (y_test == 'Completed').astype(int)
-
-    # Check Data Distribution
-
-
-    # Compute ROC curve and AUC
-
-    fpr, tpr, thresholds = roc_curve(y_proba)
-    roc_auc = auc(fpr, tpr)
-    
-
-    # Plot ROC curve
-    plt.figure()
-    plt.plot(fpr, tpr, color='darkorange', lw=2, label='ROC curve (area = %0.2f)' % roc_auc)
-    plt.plot([0, 1], [0, 1], color='navy', lw=2, linestyle='--')
-    plt.xlim([0.0, 1.0])
-    plt.ylim([0.0, 1.05])
-    plt.xlabel('False Positive Rate')
-    plt.ylabel('True Positive Rate')
-    plt.title('Receiver Operating Characteristic')
-    plt.legend(loc="lower right")
-    plt.show()
-else:
-    print("No positive samples in the test set.")
+print("Selected features:")
+print(selected_features)
