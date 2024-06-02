@@ -2,15 +2,21 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.feature_selection import SelectKBest, f_classif
-from sklearn.model_selection import StratifiedKFold
+from sklearn.model_selection import StratifiedKFold, cross_val_score, train_test_split
+from sklearn.linear_model import Lasso, LogisticRegression
+from sklearn.impute import SimpleImputer
 import numpy as np
 
 # Load data from Excel file
-df = pd.read_excel('balanced_data.xlsx')
+df = pd.read_excel('normalized_data.xlsx')
 
 # Split data into features (X) and target variable (y)
 X = df.drop(columns=['Completed'])
 y = df['Completed']
+
+# Handle missing values by imputing with the mean (can be adjusted to other strategies if needed)
+imputer = SimpleImputer(strategy='mean')
+X = pd.DataFrame(imputer.fit_transform(X), columns=X.columns)
 
 # Function to perform feature selection with cross-validation
 def select_features_cv(X, y, k=20, n_splits=5):
@@ -88,4 +94,29 @@ plt.title('Top {} Selected Features (Average Scores)'.format(k_features))
 plt.gca().invert_yaxis()  # Invert y-axis to display features from top to bottom
 plt.show()
 
+# Checking for Overfitting using Regularization and Model Performance
+# Split the data into training and validation sets
+X_train, X_val, y_train, y_val = train_test_split(X_selected, y, test_size=0.2, random_state=42, stratify=y)
 
+# Apply Lasso Regression to check feature stability
+lasso = Lasso(alpha=0.1)
+lasso.fit(X_train, y_train)
+
+# Print Lasso coefficients
+print("Lasso coefficients:", lasso.coef_)
+
+# Cross-validation with Logistic Regression
+logreg = LogisticRegression(max_iter=1000)
+cv_scores = cross_val_score(logreg, X_selected, y, cv=5)
+print("Cross-validation scores:", cv_scores)
+print("Mean cross-validation score:", cv_scores.mean())
+
+# Train and evaluate Logistic Regression on validation set
+logreg.fit(X_train, y_train)
+train_score = logreg.score(X_train, y_train)
+val_score = logreg.score(X_val, y_val)
+
+print("Training set score:", train_score)
+print("Validation set score:", val_score)
+
+# If there is a significant drop in performance from training to validation, there might be overfitting

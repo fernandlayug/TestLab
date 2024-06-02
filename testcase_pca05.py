@@ -59,7 +59,7 @@ def biplot(score, coeff, labels=None):
     for i in range(n):
         plt.arrow(0, 0, coeff[i, 0], coeff[i, 1], color='r', alpha=0.5)
         if labels is None:
-            plt.text(coeff[i, 0] * 1.15, coeff[i, 1] * 1.15, "Var" + str(i + 1), color='g', ha='center', va='center')
+            plt.text(coeff[i, 0] * 1.15, coeff[i, 1] * 1.15, "PC" + str(i + 1), color='g', ha='center', va='center')
         else:
             plt.text(coeff[i, 0] * 1.15, coeff[i, 1] * 1.15, labels[i], color='g', ha='center', va='center')
     plt.xlabel("PC1")
@@ -112,6 +112,9 @@ gbdt_pca.fit(principal_components, y)
 
 # Predictions using transformed features
 gbdt_pred_pca = gbdt_pca.predict(principal_components)
+
+# Accuracy score using
+
 
 # Accuracy score using transformed features
 accuracy_gbdt_pca = accuracy_score(y, gbdt_pred_pca)
