@@ -1,4 +1,7 @@
 import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.metrics import confusion_matrix
 from sklearn.model_selection import train_test_split, GridSearchCV, cross_val_score, KFold
 from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.preprocessing import StandardScaler
@@ -23,9 +26,12 @@ gbdt = GradientBoostingClassifier()
 
 # Define the hyperparameters grid for GridSearchCV
 param_grid = {
-    'n_estimators': [50, 100, 150],
-    'learning_rate': [0.05, 0.1, 0.15],
-    'max_depth': [3, 4, 5],
+  'n_estimators': [50, 100],
+    'learning_rate': [0.05, 0.1],
+    'max_depth': [3, 4],
+    'min_samples_split': [2, 5],
+    'min_samples_leaf': [1, 2],
+    'subsample': [0.8, 1.0]
 }
 
 # Perform GridSearchCV for hyperparameter tuning
@@ -50,3 +56,23 @@ print("Mean Cross-Validation Score:", cv_scores.mean())
 # Evaluation on the testing set
 test_accuracy = best_gbdt.score(X_test_scaled, y_test)
 print("Testing Accuracy:", test_accuracy)
+
+
+# Visualize cross-validation scores
+plt.figure(figsize=(8, 6))
+sns.barplot(x=[f"Fold {i+1}" for i in range(len(cv_scores))], y=cv_scores)
+plt.xlabel('Fold')
+plt.ylabel('Accuracy')
+plt.title('Cross-Validation Scores')
+plt.ylim(0.8, 1.0)
+plt.show()
+
+# Visualize confusion matrix for testing set
+y_pred = best_gbdt.predict(X_test_scaled)
+conf_matrix = confusion_matrix(y_test, y_pred)
+plt.figure(figsize=(8, 6))
+sns.heatmap(conf_matrix, annot=True, fmt='d', cmap='Blues', xticklabels=['Class 0', 'Class 1'], yticklabels=['Class 0', 'Class 1'])
+plt.xlabel('Predicted Label')
+plt.ylabel('True Label')
+plt.title('Confusion Matrix - Testing Set')
+plt.show()
