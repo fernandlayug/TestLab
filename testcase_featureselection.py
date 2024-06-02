@@ -2,7 +2,7 @@ import pandas as pd
 from sklearn.feature_selection import SelectKBest, f_regression
 
 # Load data from Excel file into a DataFrame
-df = pd.read_excel("ALSResponses05.xlsx")
+df = pd.read_excel("balanced_data.xlsx")
 
 # Separate features (X) and target variable (y)
 X = df.drop(columns=["Completed"])

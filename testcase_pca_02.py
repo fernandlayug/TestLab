@@ -6,7 +6,7 @@ import seaborn as sns
 import numpy as np
 
 # Step 1: Read data from Excel file into pandas DataFrame
-df = pd.read_excel("ALSResponses05.xlsx")
+df = pd.read_excel("selected_data.xlsx")
 
 # Step 2: Exclude the target column
 target_column = "Completed"

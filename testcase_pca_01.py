@@ -5,7 +5,7 @@ from sklearn.preprocessing import StandardScaler
 import matplotlib.pyplot as plt
 
 # Load data from Excel file
-file_path = 'ALSResponses05.xlsx'  # Update with your file path
+file_path = 'selected_data.xlsx'  # Update with your file path
 data = pd.read_excel(file_path)
 
 # Separate features from the target variable, if any
