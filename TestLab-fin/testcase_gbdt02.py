@@ -3,9 +3,9 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.metrics import accuracy_score, confusion_matrix, classification_report, roc_auc_score, roc_curve
 from sklearn.model_selection import train_test_split, GridSearchCV, cross_val_score, KFold
-from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.preprocessing import StandardScaler
-import joblib  # Import joblib from scikit-learn
+import joblib
+import xgboost as xgb
 
 # Load your dataset from Excel (replace 'transformed_features.xlsx' with your Excel file)
 data = pd.read_excel('selected_data.xlsx')
@@ -22,27 +22,21 @@ scaler = StandardScaler()
 X_train_scaled = scaler.fit_transform(X_train)
 X_test_scaled = scaler.transform(X_test)
 
-# Define the Gradient Boosting Classifier
-gbdt = GradientBoostingClassifier()
+# Define the XGBoost Classifier
+xgb_clf = xgb.XGBClassifier(use_label_encoder=False, eval_metric='logloss')
 
 # Define the hyperparameters grid for GridSearchCV
 param_grid = {
-    # 'n_estimators': [50, 100],
-    # 'learning_rate': [0.05, 0.1],
-    # 'max_depth': [3, 4],
-    # 'min_samples_split': [2, 5],
-    # 'min_samples_leaf': [1, 2],
-    # 'subsample': [0.8, 1.0]
     'n_estimators': [50, 100, 150],
     'learning_rate': [0.05, 0.1, 0.15],
     'max_depth': [3, 4, 5],
-    'min_samples_split': [2, 5, 10],
-    'min_samples_leaf': [1, 2, 4],
-    'subsample': [0.8, 0.9, 1.0]
+    'min_child_weight': [1, 2, 4],
+    'subsample': [0.8, 0.9, 1.0],
+    'colsample_bytree': [0.8, 0.9, 1.0]
 }
 
 # Perform GridSearchCV for hyperparameter tuning
-grid_search = GridSearchCV(estimator=gbdt, param_grid=param_grid, cv=5, n_jobs=-1)
+grid_search = GridSearchCV(estimator=xgb_clf, param_grid=param_grid, cv=5, n_jobs=-1)
 grid_search.fit(X_train_scaled, y_train)
 
 # Get the best parameters
@@ -51,20 +45,20 @@ best_params = grid_search.best_params_
 print("Best Parameters:", best_params)
 
 # Use the best parameters to train the model
-best_gbdt = GradientBoostingClassifier(**best_params)
-best_gbdt.fit(X_train_scaled, y_train)
+best_xgb = xgb.XGBClassifier(**best_params, use_label_encoder=False, eval_metric='logloss')
+best_xgb.fit(X_train_scaled, y_train)
 
 # Save the trained model to a .pkl file
-joblib.dump(best_gbdt, 'best_gbdt_model_1.pkl')
+joblib.dump(best_xgb, 'best_xgb_model.pkl')
 
 # K-fold cross-validation
 kf = KFold(n_splits=5, shuffle=True, random_state=42)
-cv_scores = cross_val_score(best_gbdt, X_train_scaled, y_train, cv=kf)
+cv_scores = cross_val_score(best_xgb, X_train_scaled, y_train, cv=kf)
 print("Cross-Validation Scores:", cv_scores)
 print("Mean Cross-Validation Score:", cv_scores.mean())
 
 # Evaluation on the testing set
-y_pred = best_gbdt.predict(X_test_scaled)
+y_pred = best_xgb.predict(X_test_scaled)
 
 # Accuracy
 accuracy = accuracy_score(y_test, y_pred)
@@ -80,7 +74,7 @@ print("Classification Report:")
 print(classification_report(y_test, y_pred))
 
 # ROC AUC
-y_pred_prob = best_gbdt.predict_proba(X_test_scaled)[:, 1]
+y_pred_prob = best_xgb.predict_proba(X_test_scaled)[:, 1]
 roc_auc = roc_auc_score(y_test, y_pred_prob)
 print("ROC AUC Score:", roc_auc)
 
