@@ -4,6 +4,7 @@ import seaborn as sns
 from sklearn.preprocessing import StandardScaler
 from sklearn.impute import SimpleImputer
 from imblearn.over_sampling import SMOTE
+import joblib
 
 # Read data from Excel file
 excel_file = "encoded_data.xlsx"
