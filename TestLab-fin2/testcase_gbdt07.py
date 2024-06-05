@@ -7,8 +7,9 @@ from sklearn.preprocessing import StandardScaler
 import joblib
 import xgboost as xgb
 import openpyxl
+import numpy as np
 
-# Load your dataset from Excel (replace 'transformed_features.xlsx' with your Excel file)
+# Load your dataset from Excel (replace 'selected_data_1.xlsx' with your Excel file)
 data = pd.read_excel('selected_data_1.xlsx')
 
 # Separate features and target variable
@@ -26,17 +27,17 @@ scaler = StandardScaler()
 X_train_scaled = scaler.fit_transform(X_train)
 X_test_scaled = scaler.transform(X_test)
 
-# Save the scaler
-joblib.dump(scaler, 'scaler.pkl')
+# Save the scaler to a .pkl file
+joblib.dump(scaler, 'scaler_1.pkl')
 
 # Save the scaler to an Excel file
 scaler_data = pd.DataFrame(data={'mean': scaler.mean_, 'scale': scaler.scale_})
-scaler_data.to_excel('scaler.xlsx', index=False)
+scaler_data.to_excel('scaler_1.xlsx', index=False)
 
 # Define the XGBoost Classifier
 xgb_clf = xgb.XGBClassifier(use_label_encoder=False, eval_metric='logloss')
 
-# Define the hyperparameters grid for GridSearchCV
+# Define the hyperparameters grid for GridSearchCV, including L1 and L2 regularization
 param_grid = {
     'n_estimators': [50, 100, 150],
     'learning_rate': [0.05, 0.1, 0.15],
@@ -44,11 +45,12 @@ param_grid = {
     'min_child_weight': [1, 2, 4],
     'subsample': [0.8, 0.9, 1.0],
     'colsample_bytree': [0.8, 0.9, 1.0],
-
+    'reg_alpha': [0, 0.1, 0.5, 1],
+    'reg_lambda': [0.5, 1, 1.5, 2]
 }
 
 # Perform GridSearchCV for hyperparameter tuning
-grid_search = GridSearchCV(estimator=xgb_clf, param_grid=param_grid, cv=5, n_jobs=-1)
+grid_search = GridSearchCV(estimator=xgb_clf, param_grid=param_grid, cv=5, n_jobs=-1, scoring='roc_auc')
 grid_search.fit(X_train_scaled, y_train)
 
 # Get the best parameters
@@ -61,11 +63,11 @@ best_xgb = xgb.XGBClassifier(**best_params, use_label_encoder=False, eval_metric
 best_xgb.fit(X_train_scaled, y_train)
 
 # Save the trained model to a .pkl file
-joblib.dump(best_xgb, 'best_xgb_model_6.pkl')
+joblib.dump(best_xgb, 'best_xgb_model_7.pkl')
 
 # K-fold cross-validation
 kf = KFold(n_splits=5, shuffle=True, random_state=42)
-cv_scores = cross_val_score(best_xgb, X_train_scaled, y_train, cv=kf)
+cv_scores = cross_val_score(best_xgb, X_train_scaled, y_train, cv=kf, scoring='roc_auc')
 print("Cross-Validation Scores:", cv_scores)
 print("Mean Cross-Validation Score:", cv_scores.mean())
 
@@ -108,7 +110,7 @@ plt.show()
 plt.figure(figsize=(8, 6))
 sns.barplot(x=[f"Fold {i+1}" for i in range(len(cv_scores))], y=cv_scores)
 plt.xlabel('Fold')
-plt.ylabel('Accuracy')
+plt.ylabel('ROC AUC')
 plt.title('Cross-Validation Scores')
 plt.ylim(0.8, 1.0)
 plt.show()
@@ -130,4 +132,23 @@ plt.xlabel('False Positive Rate')
 plt.ylabel('True Positive Rate')
 plt.title('Receiver Operating Characteristic (ROC) Curve')
 plt.legend()
+plt.show()
+
+# Visualize the effect of reg_alpha and reg_lambda on cross-validated performance
+results = pd.DataFrame(grid_search.cv_results_)
+plt.figure(figsize=(14, 6))
+
+plt.subplot(1, 2, 1)
+sns.lineplot(data=results, x='param_reg_alpha', y='mean_test_score', marker='o')
+plt.xlabel('reg_alpha')
+plt.ylabel('Mean ROC AUC')
+plt.title('Effect of reg_alpha on ROC AUC')
+
+plt.subplot(1, 2, 2)
+sns.lineplot(data=results, x='param_reg_lambda', y='mean_test_score', marker='o')
+plt.xlabel('reg_lambda')
+plt.ylabel('Mean ROC AUC')
+plt.title('Effect of reg_lambda on ROC AUC')
+
+plt.tight_layout()
 plt.show()
