@@ -32,7 +32,7 @@ X_resampled, y_resampled = smote.fit_resample(normalized_data, target)
 
 # Save the balanced data to an Excel file
 balanced_data = pd.concat([pd.DataFrame(X_resampled, columns=features.columns), pd.Series(y_resampled, name=target.name)], axis=1)
-output_excel_file = "balanced_data.xlsx"
+output_excel_file = "balanced_data_normalized_1.xlsx"
 balanced_data.to_excel(output_excel_file, index=False)
 
 # Visualization before normalization
