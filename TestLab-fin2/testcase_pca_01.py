@@ -5,7 +5,7 @@ from sklearn.preprocessing import StandardScaler
 import matplotlib.pyplot as plt
 
 # Load data from Excel file
-file_path = 'selected_data.xlsx'  # Update with your file path
+file_path = 'selected_data_2.xlsx'  # Update with your file path
 data = pd.read_excel(file_path)
 
 # Separate features from the target variable, if any
@@ -70,4 +70,4 @@ plt.show()
 
 # Optionally, you can save the transformed data to a new Excel file
 pca_data = pd.DataFrame(X_pca, columns=[f"PC{i}" for i in range(1, n_components+1)])
-pca_data.to_excel('pca_data.xlsx', index=False)
+pca_data.to_excel('pca_data_2.xlsx', index=False)

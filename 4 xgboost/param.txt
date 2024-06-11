@@ -1,0 +1,40 @@
+Best Parameters: {'colsample_bytree': 0.8, 'learning_rate': 0.15, 'max_depth': 7, 'min_child_weight': 1, 'n_estimators': 150, 'reg_alpha': 0, 'reg_lambda': 0.5, 'subsample': 1.0}
+Cross-Validation Scores: [0.98430855 0.98609673 0.98718167 0.98767638 0.98422939]
+Mean Cross-Validation Score: 0.9858985452022877
+Accuracy: 0.9575575027382256
+Confusion Matrix:
+[[1745   75]
+ [  80 1752]]
+Classification Report:
+              precision    recall  f1-score   support
+
+           0       0.96      0.96      0.96      1820
+           1       0.96      0.96      0.96      1832
+
+    accuracy                           0.96      3652
+   macro avg       0.96      0.96      0.96      3652
+weighted avg       0.96      0.96      0.96      3652
+
+ROC AUC Score: 0.9880893396996018
+Feature Importances:
+                                              Feature  Importance
+12                              HomeAddressType_Urban    0.116478
+19                                 DistanceHomeSchool    0.078180
+0                               HomeAddressType_Rural    0.070879
+18                                   FinancialSupport    0.068293
+10      ReasonNotAttendingSchool_Schools are very far    0.064088
+17                                      DaysAvailable    0.050781
+7                                    PerformanceScale    0.047029
+16                                             Gender    0.044290
+13                                    Guardian_Mother    0.043927
+5                              Transportation_Commute    0.043129
+14                                MotherJob_Housewife    0.042315
+9                                AttendClassRegularly    0.041673
+2                                               Child    0.041335
+4   ReasonNotAttendingSchool_Employment/Looking fo...    0.040447
+15                                         TravelTime    0.039874
+3                                           TimeSpent    0.037734
+1                                     FatherEducation    0.036325
+8                                                 Job    0.033510
+6                  ParentCohabitation_Living Together    0.031160
+11                           FamilyEducationalSupport    0.028552
