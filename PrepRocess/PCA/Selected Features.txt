@@ -1,7 +1,0 @@
-Selected features:
-Index(['SchoolAttended_Private', 'MotherJob', 'SchoolAttended_Private', 
-       'DistanceHomeSchool', 'ParentCohabitation_Living Together',      
-       'PerformanceScale', 'FatherJob', 'Gender', 'InternetAccess',     
-       'Guardian_Mother', 'FatherJob', 'NotAttendingSchool_Schools far',
-       'DaysAvailable', 'FinancialSupport', 'Job'],
-      dtype='object')
