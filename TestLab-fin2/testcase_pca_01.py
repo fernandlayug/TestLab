@@ -1,84 +1,82 @@
+import numpy as np
 import pandas as pd
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
+from sklearn.feature_selection import SelectKBest, f_regression
 import matplotlib.pyplot as plt
-import seaborn as sns
-import numpy as np
 
-# Step 1: Read data from Excel file into pandas DataFrame
-df = pd.read_excel("selected_data_1.xlsx")
+# Load data from Excel file
+file_path = 'selected_data.xlsx'  # Update with your file path
+data = pd.read_excel(file_path)
 
-# Step 2: Exclude the target column
-target_column = "Completed"
-df_features = df.drop(columns=[target_column])
+# Separate features from the target variable, if any
+target_column = 'Completed'  # Update with the name of your target column, if any
+X = data.drop(columns=[target_column])  
+y = data[target_column]
 
-# Step 3: Preprocess the data if necessary
-# For example, handle missing values or encode categorical variables
+# Get the names of the features
+feature_names = X.columns.tolist()
 
-# Step 4: Standardize the features
+# Feature selection using SelectKBest
+best_features_selector = SelectKBest(score_func=f_regression, k=5)  # Select the best 5 features
+X_best = best_features_selector.fit_transform(X, y)
+best_feature_indices = best_features_selector.get_support(indices=True)
+best_feature_names = [feature_names[i] for i in best_feature_indices]
+
+# Standardize the selected features
 scaler = StandardScaler()
-df_standardized = scaler.fit_transform(df_features)
+X_scaled = scaler.fit_transform(X_best)
 
-# Step 5: Apply PCA
+# Perform PCA
 pca = PCA()
-pca.fit(df_standardized)
+X_pca = pca.fit_transform(X_scaled)
 
-# Step 6: Analyze explained variance ratio
-explained_variance_ratio = pca.explained_variance_ratio_
-cumulative_variance_ratio = explained_variance_ratio.cumsum()
-
-# Scree plot
-plt.figure(figsize=(10, 6))
-plt.bar(range(1, len(explained_variance_ratio) + 1), explained_variance_ratio, alpha=0.5, align='center',
-        label='Individual explained variance')
-plt.step(range(1, len(cumulative_variance_ratio) + 1), cumulative_variance_ratio, where='mid',
-         label='Cumulative explained variance')
-plt.xlabel('Principal components')
-plt.ylabel('Explained variance ratio')
-plt.title('Scree Plot')
-plt.legend(loc='best')
-plt.tight_layout()
+# Plot explained variance ratio
+plt.figure(figsize=(8, 6))
+components = range(1, len(pca.explained_variance_ratio_) + 1)
+plt.bar(components, pca.explained_variance_ratio_, alpha=0.5, align='center')
+plt.xlabel('Principal Components')
+plt.ylabel('Explained Variance Ratio')
+plt.title('Explained Variance Ratio by Principal Component')
+# Add labels
+for i, ratio in enumerate(pca.explained_variance_ratio_):
+    plt.text(components[i], ratio + 0.01, f'{ratio:.2f}', ha='center')
 plt.show()
 
-# Determine the number of principal components to retain
-n_components = len(cumulative_variance_ratio[cumulative_variance_ratio <= 0.95])
+# You can choose a number of components based on the explained variance ratio plot or specify it directly
+# For example, to choose the number of components that explain 95% of the variance:
+cumulative_variance_ratio = np.cumsum(pca.explained_variance_ratio_)
+n_components = np.argmax(cumulative_variance_ratio >= 0.95) + 1
+print(f"Number of components to explain 95% variance: {n_components}")
 
-# Step 7: Transform original features into new feature space using selected principal components
+# Re-fit PCA with chosen number of components
 pca = PCA(n_components=n_components)
-principal_components = pca.fit_transform(df_standardized)
+X_pca = pca.fit_transform(X_scaled)
 
-# Create a DataFrame with PCA features
-pca_columns = [f"PCA_{i+1}" for i in range(n_components)]
-df_pca = pd.DataFrame(principal_components, columns=pca_columns)
+# Output the principal components
+print("Principal Components:")
+print(X_pca)
 
-# Combine original DataFrame with PCA features
-df_combined = pd.concat([df, df_pca], axis=1)
+# Interpretation
+print("Explained variance ratio:", pca.explained_variance_ratio_)
 
-# Step 8: Analyze loadings of each principal component
-loadings = pca.components_
+# Mean
+X_mean = X.mean()
 
-# Get the absolute values of loadings for each feature
-abs_loadings = np.abs(loadings)
+# Standard deviation
+X_std = X.std()
 
-# Determine the most important feature for each principal component
-most_important_features = abs_loadings.argmax(axis=1)
+# Standardization
+Z = (X - X_mean) / X_std
 
-# Get the names of the selected features
-selected_features = df_features.columns[most_important_features]
+# covariance
+c = Z.cov()
 
-print("Selected features:")
-print(selected_features)
-
-# Create a DataFrame for loadings
-loadings_df = pd.DataFrame(loadings, columns=df_features.columns, index=pca_columns)
-
-# Plot heatmap
-plt.figure(figsize=(12, 8))
-sns.heatmap(loadings_df, cmap='coolwarm', annot=True, fmt=".2f")
-plt.title('PCA Loadings Heatmap')
-plt.xlabel('Original Features')
-plt.ylabel('Principal Components')
+# Plot the covariance matrix
+import seaborn as sns
+sns.heatmap(c)
 plt.show()
 
-# Save the combined DataFrame to a new Excel file if needed
-df_combined.to_excel("data_with_pca_features.xlsx", index=False)
+# Optionally, you can save the transformed data to a new Excel file
+pca_data = pd.DataFrame(X_pca, columns=[f"PC{i}" for i in range(1, n_components+1)])
+pca_data.to_excel('pca_data.xlsx', index=False)

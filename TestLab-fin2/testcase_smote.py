@@ -16,19 +16,9 @@ data_imputed = pd.DataFrame(imputer.fit_transform(data), columns=data.columns)
 features = data_imputed.iloc[:, :-1]  # Assuming the last column is the target variable
 target = data_imputed.iloc[:, -1]
 
-# Compute counts before SMOTE
-before_counts = target.value_counts()
-print("Counts before SMOTE:")
-print(before_counts)
-
 # Apply SMOTE to balance the dataset
 smote = SMOTE(random_state=42)
 X_resampled, y_resampled = smote.fit_resample(features, target)
-
-# Compute counts after SMOTE
-after_counts = pd.Series(y_resampled).value_counts()
-print("\nCounts after SMOTE:")
-print(after_counts)
 
 # Save the balanced data to an Excel file
 balanced_data = pd.concat([pd.DataFrame(X_resampled, columns=features.columns), pd.Series(y_resampled, name=target.name)], axis=1)
