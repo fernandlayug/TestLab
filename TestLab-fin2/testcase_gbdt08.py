@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.metrics import accuracy_score, confusion_matrix, classification_report, roc_auc_score, roc_curve
 from sklearn.model_selection import train_test_split, GridSearchCV, cross_val_score, KFold
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import StandardScaler, LabelEncoder
 import joblib
 import xgboost as xgb
 import openpyxl
@@ -17,11 +17,18 @@ data = pd.read_excel('selected_data_1.xlsx')
 X = data.drop(columns=['Completed'])  # Features
 y = data['Completed']  # Target variable
 
+# Encoding categorical variables (example, replace with your actual encoding process)
+encoder = LabelEncoder()
+X_encoded = X.apply(encoder.fit_transform)
+
+# Save the encoder to a .pkl file
+joblib.dump(encoder, 'encoder.pkl')
+
 # Keep track of the feature names
-feature_names = X.columns.tolist()
+feature_names = X_encoded.columns.tolist()
 
 # Split the data into training and testing sets (adjust test_size and random_state as needed)
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(X_encoded, y, test_size=0.2, random_state=42)
 
 # Data preparation: Scale the features using StandardScaler
 scaler = StandardScaler()
