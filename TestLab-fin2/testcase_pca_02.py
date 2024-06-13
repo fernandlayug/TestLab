@@ -22,6 +22,15 @@ df_standardized = scaler.fit_transform(df_features)
 # Step 5: Compute the covariance matrix
 cov_matrix = np.cov(df_standardized, rowvar=False)
 
+# New Step: Visualize the covariance matrix
+plt.figure(figsize=(12, 10))
+sns.heatmap(cov_matrix, annot=True, fmt='.2f', cmap='coolwarm',
+            xticklabels=df_features.columns, yticklabels=df_features.columns)
+plt.title('Covariance Matrix Heatmap')
+plt.xlabel('Features')
+plt.ylabel('Features')
+plt.show()
+
 # Step 6: Compute eigenvalues and eigenvectors
 eigenvalues, eigenvectors = np.linalg.eig(cov_matrix)
 
@@ -81,7 +90,7 @@ for i, feature_index in enumerate(most_important_features):
 # Create a DataFrame for loadings
 loadings_df = pd.DataFrame(loadings, columns=df_features.columns)
 
-# Plot heatmap
+# Plot heatmap of PCA loadings
 plt.figure(figsize=(12, 8))
 sns.heatmap(loadings_df, cmap='coolwarm', annot=True, fmt=".2f")
 plt.title('PCA Loadings Heatmap')
