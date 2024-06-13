@@ -23,6 +23,20 @@ df_standardized = scaler.fit_transform(df_features)
 pca = PCA()
 pca.fit(df_standardized)
 
+
+# Plot explained variance ratio
+plt.figure(figsize=(8, 6))
+components = range(1, len(pca.explained_variance_ratio_) + 1)
+plt.bar(components, pca.explained_variance_ratio_, alpha=0.5, align='center')
+plt.xlabel('Principal Components')
+plt.ylabel('Explained Variance Ratio')
+plt.title('Explained Variance Ratio by Principal Component')
+# Add labels
+for i, ratio in enumerate(pca.explained_variance_ratio_):
+    plt.text(components[i], ratio + 0.01, f'{ratio:.2f}', ha='center')
+plt.show()
+
+
 # Step 6: Analyze explained variance ratio
 explained_variance_ratio = pca.explained_variance_ratio_
 cumulative_variance_ratio = explained_variance_ratio.cumsum()
