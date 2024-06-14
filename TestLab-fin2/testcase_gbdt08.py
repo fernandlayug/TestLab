@@ -75,7 +75,7 @@ best_xgb = xgb.XGBClassifier(**best_params, use_label_encoder=False, eval_metric
 best_xgb.fit(X_train_scaled, y_train)
 
 # Save the trained model to a .pkl file
-joblib.dump(best_xgb, 'best_xgb_model_7.pkl')
+joblib.dump(best_xgb, 'best_xgb_model_8.pkl')
 
 # K-fold cross-validation
 kf = KFold(n_splits=5, shuffle=True, random_state=42)
